@@ -286,9 +286,6 @@
         '<img src="' + p.data + '" alt="photo ' + (i+1) + '">' +
         '<div class="photo-item-info">' +
           '<div class="photo-num">📷 ' + p.name + (p.uploaded ? ' ☁✓' : '') + '</div>' +
-          '<input class="photo-comment-input" type="text" placeholder="Ajouter un commentaire…" ' +
-            'value="' + (p.comment||'').replace(/"/g,'&quot;') + '" ' +
-            'oninput="pics[' + i + '].comment=this.value">' +
         '</div>' +
         '<button class="del-btn" onclick="delPic(' + i + ')">✕</button>';
       list.appendChild(row);
