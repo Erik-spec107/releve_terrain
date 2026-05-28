@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Terrain">
+<meta name="theme-color" content="#1a73e8">
+<title>Saisie terrain</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #f0f4f8; min-height: 100vh; }
+
+  .topbar { background: #1a73e8; color: white; padding: 14px 16px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 10; }
+  .topbar h1 { font-size: 17px; font-weight: 500; flex: 1; }
+  .topbar .badge { font-size: 12px; background: rgba(255,255,255,0.22); padding: 4px 10px; border-radius: 20px; cursor: pointer; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── Formulaire ── */
+  .form-wrap { padding: 14px; }
+  .card { background: white; border-radius: 12px; overflow: hidden; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .field { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; }
+  .field:last-child { border-bottom: none; }
+  .field label { font-size: 11px; color: #757575; display: block; margin-bottom: 5px; font-weight: 500; text-transform: uppercase; letter-spacing: .4px; }
+  .field input { width: 100%; font-size: 16px; border: none; outline: none; background: transparent; color: #212121; padding: 0; }
+  .field input::placeholder { color: #bdbdbd; }
+
+  /* ── Date ── */
+  .field input[type="datetime-local"] { font-size: 15px; color: #212121; }
+
+  /* ── Photos ── */
+  .photos-section { padding: 12px 16px 14px; }
+  .photos-label { font-size: 11px; color: #757575; font-weight: 500; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 10px; }
+  .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .photo-thumb { aspect-ratio: 1; border-radius: 8px; overflow: hidden; position: relative; background: #f5f5f5; }
+  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo-thumb .del { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.55); color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; cursor: pointer; }
+  .add-photo { aspect-ratio: 1; border-radius: 8px; background: #f0f4f8; border: 2px dashed #1a73e8; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; gap: 4px; }
+  .add-photo .ico { font-size: 28px; color: #1a73e8; }
+  .add-photo span { font-size: 11px; color: #1a73e8; font-weight: 500; }
+
+  /* ── Bouton enregistrer ── */
+  .save-wrap { padding: 0 14px 30px; }
+  .btn-save { width: 100%; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; border: none; background: #1a73e8; color: white; letter-spacing: .3px; transition: background .15s; active: background #185ab4; }
+  .btn-save:active { background: #185ab4; transform: scale(0.99); }
+
+  /* ── Toast ── */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #323232; color: white; padding: 12px 20px; border-radius: 8px; font-size: 14px; display: none; align-items: center; gap: 8px; white-space: nowrap; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+  .toast.show { display: flex; }
+
+  /* ── Liste des visites ── */
+  .list-wrap { padding: 14px; }
+  .list-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .list-head span { font-size: 13px; color: #757575; }
+  .btn-export { padding: 8px 14px; border-radius: 8px; border: 1px solid #1a73e8; background: white; color: #1a73e8; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .vitem { background: white; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.07); display: flex; align-items: center; gap: 12px; }
+  .vdot { width: 10px; height: 10px; border-radius: 50%; background: #1a73e8; flex-shrink: 0; }
+  .vinfo { flex: 1; min-width: 0; }
+  .vname { font-size: 14px; font-weight: 500; color: #212121; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vmeta { font-size: 12px; color: #757575; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vphotos { font-size: 12px; color: #9e9e9e; flex-shrink: 0; }
+  .empty-list { text-align: center; padding: 50px 20px; color: #bdbdbd; }
+  .empty-list .e-ico { font-size: 48px; margin-bottom: 10px; }
+  .empty-list p { font-size: 14px; }
+
+  #fileInput { display: none; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+  <h1>Saisie terrain</h1>
+  <span class="badge" id="badge" onclick="togglePage()">0 visite</span>
+</div>
+
+<!-- PAGE FORMULAIRE -->
+<div class="page active" id="pageForm">
+  <div class="form-wrap">
+    <div class="card">
+      <div class="field">
+        <label>Client</label>
+        <input type="text" id="client" placeholder="Nom du client" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Chantier</label>
+        <input type="text" id="chantier" placeholder="Nom ou référence du chantier" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Localisation sur le bâtiment</label>
+        <input type="text" id="loc" placeholder="Ex : toiture nord, façade est…" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Date</label>
+        <input type="datetime-local" id="dt">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="photos-section">
+        <div class="photos-label" id="photosLabel">Photos</div>
+        <div class="photo-grid" id="photoGrid">
+          <div class="add-photo" onclick="document.getElementById('fileInput').click()">
+            <div class="ico">📷</div>
+            <span>Ajouter</span>
+          </div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" multiple onchange="addPhotos(this)">
+      </div>
+    </div>
+  </div>
+
+  <div class="save-wrap">
+    <button class="btn-save" onclick="save()">Enregistrer</button>
+  </div>
+</div>
+
+<!-- PAGE LISTE -->
+<div class="page" id="pageList">
+  <div class="list-wrap">
+    <div class="list-head">
+      <span id="listCount">0 visite(s)</span>
+      <button class="btn-export" onclick="exportJSON()">⬇ Export JSON</button>
+    </div>
+    <div id="listItems">
+      <div class="empty-list">
+        <div class="e-ico">📋</div>
+        <p>Aucune visite enregistrée</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <span>✓</span>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+  let visits = JSON.parse(localStorage.getItem('terrain_v1') || '[]');
+  let pics = [];
+  let onList = false;
+
+  // Init date
+  (function() {
+    const n = new Date();
+    n.setSeconds(0); n.setMilliseconds(0);
+    document.getElementById('dt').value = n.toISOString().slice(0,16);
+  })();
+
+  updateBadge();
+  renderGrid();
+
+  function togglePage() {
+    onList = !onList;
+    document.getElementById('pageForm').classList.toggle('active', !onList);
+    document.getElementById('pageList').classList.toggle('active', onList);
+    if (onList) renderList();
+  }
+
+  function addPhotos(input) {
+    Array.from(input.files).forEach(f => {
+      const r = new FileReader();
+      r.onload = e => {
+        pics.push({ name: f.name, data: e.target.result });
+        renderGrid();
+      };
+      r.readAsDataURL(f);
+    });
+    input.value = '';
+  }
+
+  function renderGrid() {
+    const g = document.getElementById('photoGrid');
+    const lbl = document.getElementById('photosLabel');
+    lbl.textContent = pics.length ? pics.length + ' photo(s)' : 'Photos';
+    g.innerHTML = '';
+    pics.forEach((p, i) => {
+      const d = document.createElement('div');
+      d.className = 'photo-thumb';
+      d.innerHTML = '<img src="' + p.data + '" alt="photo"><div class="del" onclick="delPic(' + i + ')">✕</div>';
+      g.appendChild(d);
+    });
+    const add = document.createElement('div');
+    add.className = 'add-photo';
+    add.innerHTML = '<div class="ico">📷</div><span>Ajouter</span>';
+    add.onclick = () => document.getElementById('fileInput').click();
+    g.appendChild(add);
+  }
+
+  function delPic(i) {
+    pics.splice(i, 1);
+    renderGrid();
+  }
+
+  function save() {
+    const client = document.getElementById('client').value.trim();
+    const chantier = document.getElementById('chantier').value.trim();
+    if (!client) { showToast('Saisissez le client'); return; }
+    if (!chantier) { showToast('Saisissez le chantier'); return; }
+
+    // On stocke les photos en base64 complètes pour le rapport PC
+    visits.push({
+      id: Date.now(),
+      client,
+      chantier,
+      loc: document.getElementById('loc').value.trim(),
+      date: document.getElementById('dt').value || new Date().toISOString(),
+      photos: pics.map(p => ({ name: p.name, data: p.data }))
+    });
+
+    try {
+      localStorage.setItem('terrain_v1', JSON.stringify(visits));
+    } catch(e) {
+      // localStorage plein (images trop lourdes) — on stocke sans les données images
+      const light = visits.map(v => ({...v, photos: v.photos.map(p => ({name: p.name, size: Math.round((p.data||'').length * 0.75/1024) + ' KB'}))}));
+      localStorage.setItem('terrain_v1', JSON.stringify(light));
+      showToast('Photos trop lourdes pour le stockage local');
+    }
+
+    updateBadge();
+    showToast(client + ' — ' + chantier + ' enregistré');
+    reset();
+  }
+
+  function reset() {
+    pics = [];
+    document.getElementById('client').value = '';
+    document.getElementById('chantier').value = '';
+    document.getElementById('loc').value = '';
+    const n = new Date(); n.setSeconds(0); n.setMilliseconds(0);
+    document.getElementById('dt').value = n.toISOString().slice(0,16);
+    renderGrid();
+  }
+
+  function updateBadge() {
+    document.getElementById('badge').textContent = visits.length + ' visite' + (visits.length > 1 ? 's' : '');
+  }
+
+  function renderList() {
+    document.getElementById('listCount').textContent = visits.length + ' visite(s)';
+    const el = document.getElementById('listItems');
+    if (!visits.length) {
+      el.innerHTML = '<div class="empty-list"><div class="e-ico">📋</div><p>Aucune visite</p></div>';
+      return;
+    }
+    el.innerHTML = visits.slice().reverse().map(v => {
+      const d = v.date ? new Date(v.date).toLocaleString('fr-FR', {dateStyle:'short', timeStyle:'short'}) : '';
+      return '<div class="vitem"><div class="vdot"></div><div class="vinfo"><div class="vname">' + v.client + ' — ' + v.chantier + '</div><div class="vmeta">' + d + (v.loc ? ' · ' + v.loc : '') + '</div></div><div class="vphotos">' + (v.photos||[]).length + ' 📷</div></div>';
+    }).join('');
+  }
+
+  function exportJSON() {
+    if (!visits.length) { showToast('Aucune visite à exporter'); return; }
+    const blob = new Blob([JSON.stringify(visits, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'tournee_' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    showToast('Export JSON téléchargé');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+</script>
+</body>
+</html>
