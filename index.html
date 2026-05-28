@@ -9,18 +9,24 @@
 <meta name="apple-mobile-web-app-title" content="Terrain">
 <meta name="theme-color" content="#1a73e8">
 <title>Saisie terrain</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%231a73e8'/%3E%3Cpath d='M96 48c-17.7 0-32 14.3-32 32 0 24 32 64 32 64s32-40 32-64c0-17.7-14.3-32-32-32zm0 44c-6.6 0-12-5.4-12-12s5.4-12 12-12 12 5.4 12 12-5.4 12-12 12z' fill='white'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%231a73e8'/%3E%3Cpath d='M96 48c-17.7 0-32 14.3-32 32 0 24 32 64 32 64s32-40 32-64c0-17.7-14.3-32-32-32zm0 44c-6.6 0-12-5.4-12-12s5.4-12 12-12 12 5.4 12 12-5.4 12-12 12z' fill='white'/%3E%3C/svg%3E">
+
+<!-- Icône SVG inline pour écran d'accueil -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%231a73e8'/%3E%3Cpath d='M256 80c-70.7 0-128 57.3-128 128 0 96 128 244 128 244s128-148 128-244c0-70.7-57.3-128-128-128zm0 172c-24.3 0-44-19.7-44-44s19.7-44 44-44 44 19.7 44 44-19.7 44-44 44z' fill='white'/%3E%3Crect x='156' y='410' width='200' height='22' rx='11' fill='rgba(255,255,255,0.35)'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%231a73e8'/%3E%3Cpath d='M256 80c-70.7 0-128 57.3-128 128 0 96 128 244 128 244s128-148 128-244c0-70.7-57.3-128-128-128zm0 172c-24.3 0-44-19.7-44-44s19.7-44 44-44 44 19.7 44 44-19.7 44-44 44z' fill='white'/%3E%3Crect x='156' y='410' width='200' height='22' rx='11' fill='rgba(255,255,255,0.35)'/%3E%3C/svg%3E">
+
+<!-- Manifest inline pour PWA -->
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Saisie%20terrain%22%2C%22short_name%22%3A%22Terrain%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231a73e8%22%2C%22theme_color%22%3A%22%231a73e8%22%7D">
+
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #f0f4f8; min-height: 100vh; }
 
   .topbar { background: #1a73e8; color: white; padding: 14px 16px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 10; }
   .topbar h1 { font-size: 17px; font-weight: 500; flex: 1; }
-  .topbar .badge { font-size: 12px; background: rgba(255,255,255,0.22); padding: 4px 10px; border-radius: 20px; cursor: pointer; }
-  .drive-status { font-size: 11px; padding: 3px 9px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-  .drive-status.connected { background: rgba(255,255,255,0.22); }
-  .drive-status.disconnected { background: rgba(255,100,100,0.4); }
+  .badge { font-size: 12px; background: rgba(255,255,255,0.22); padding: 4px 10px; border-radius: 20px; cursor: pointer; }
+  .drive-status { font-size: 11px; padding: 3px 9px; border-radius: 20px; cursor: pointer; }
+  .drive-status.on  { background: rgba(255,255,255,0.22); }
+  .drive-status.off { background: rgba(255,80,80,0.45); }
 
   .page { display: none; }
   .page.active { display: block; }
@@ -30,31 +36,38 @@
   .field { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; }
   .field:last-child { border-bottom: none; }
   .field label { font-size: 11px; color: #757575; display: block; margin-bottom: 5px; font-weight: 500; text-transform: uppercase; letter-spacing: .4px; }
-  .field input { width: 100%; font-size: 16px; border: none; outline: none; background: transparent; color: #212121; padding: 0; }
-  .field input::placeholder { color: #bdbdbd; }
-  .field input[type="datetime-local"] { font-size: 15px; color: #212121; }
+  .field input, .field textarea { width: 100%; font-size: 16px; border: none; outline: none; background: transparent; color: #212121; padding: 0; resize: none; font-family: inherit; }
+  .field input::placeholder, .field textarea::placeholder { color: #bdbdbd; }
+  .field input[type="datetime-local"] { font-size: 15px; }
 
+  /* ── Photos ── */
   .photos-section { padding: 12px 16px 14px; }
   .photos-label { font-size: 11px; color: #757575; font-weight: 500; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 10px; }
   .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .photo-thumb { aspect-ratio: 1; border-radius: 8px; overflow: hidden; position: relative; background: #f5f5f5; }
-  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .photo-thumb .del { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.55); color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; cursor: pointer; }
-  .photo-thumb .uploading { position: absolute; inset: 0; background: rgba(26,115,232,0.6); display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 500; }
-  .photo-thumb .done { position: absolute; bottom: 4px; right: 4px; background: #4caf50; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+
+  .photo-thumb { border-radius: 8px; overflow: hidden; position: relative; background: #f5f5f5; }
+  .photo-thumb img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+  .photo-info { padding: 5px 7px; background: white; border-top: 1px solid #f0f0f0; }
+  .photo-num { font-size: 10px; color: #1a73e8; font-weight: 600; }
+  .photo-comment-input { width: 100%; font-size: 11px; border: none; outline: none; color: #424242; padding: 2px 0; font-family: inherit; background: transparent; }
+  .photo-comment-input::placeholder { color: #bdbdbd; }
+  .photo-thumb .del { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.55); color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; cursor: pointer; z-index: 2; }
+  .photo-thumb .synced-badge { position: absolute; bottom: 28px; right: 4px; background: #4caf50; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+  .photo-thumb .uploading-badge { position: absolute; bottom: 28px; right: 4px; background: #1a73e8; color: white; border-radius: 10px; padding: 1px 5px; font-size: 9px; font-weight: 600; }
+
   .add-photo { aspect-ratio: 1; border-radius: 8px; background: #f0f4f8; border: 2px dashed #1a73e8; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; gap: 4px; }
   .add-photo .ico { font-size: 28px; color: #1a73e8; }
   .add-photo span { font-size: 11px; color: #1a73e8; font-weight: 500; }
 
   .save-wrap { padding: 0 14px 30px; }
-  .btn-save { width: 100%; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; border: none; background: #1a73e8; color: white; letter-spacing: .3px; transition: all .15s; }
+  .btn-save { width: 100%; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; border: none; background: #1a73e8; color: white; transition: all .15s; }
   .btn-save:active { background: #185ab4; transform: scale(0.99); }
   .btn-save:disabled { background: #9e9e9e; }
 
-  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #323232; color: white; padding: 12px 20px; border-radius: 8px; font-size: 14px; display: none; align-items: center; gap: 8px; white-space: nowrap; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,.25); max-width: 90vw; white-space: normal; text-align: center; }
-  .toast.show { display: flex; }
-  .toast.success { background: #2e7d32; }
-  .toast.error { background: #c62828; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); color: white; padding: 12px 20px; border-radius: 8px; font-size: 14px; display: none; align-items: center; gap: 8px; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,.25); max-width: 88vw; text-align: center; background: #323232; }
+  .toast.show   { display: flex; }
+  .toast.ok     { background: #2e7d32; }
+  .toast.err    { background: #c62828; }
 
   .list-wrap { padding: 14px; }
   .list-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
@@ -62,7 +75,7 @@
   .btn-export { padding: 8px 14px; border-radius: 8px; border: 1px solid #1a73e8; background: white; color: #1a73e8; font-size: 13px; font-weight: 500; cursor: pointer; }
   .vitem { background: white; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.07); display: flex; align-items: center; gap: 12px; }
   .vdot { width: 10px; height: 10px; border-radius: 50%; background: #1a73e8; flex-shrink: 0; }
-  .vdot.synced { background: #4caf50; }
+  .vdot.ok { background: #4caf50; }
   .vinfo { flex: 1; min-width: 0; }
   .vname { font-size: 14px; font-weight: 500; color: #212121; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .vmeta { font-size: 12px; color: #757575; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -70,11 +83,10 @@
   .empty-list { text-align: center; padding: 50px 20px; color: #bdbdbd; }
   .empty-list .e-ico { font-size: 48px; margin-bottom: 10px; }
 
-  /* Overlay connexion Drive */
   .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 50; display: none; align-items: center; justify-content: center; padding: 20px; }
   .overlay.show { display: flex; }
   .overlay-box { background: white; border-radius: 16px; padding: 24px; width: 100%; max-width: 340px; text-align: center; }
-  .overlay-box h2 { font-size: 18px; font-weight: 600; color: #212121; margin-bottom: 8px; }
+  .overlay-box h2 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
   .overlay-box p { font-size: 14px; color: #757575; margin-bottom: 20px; line-height: 1.5; }
   .btn-google { width: 100%; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; background: #1a73e8; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
   .btn-skip { width: 100%; padding: 12px; border-radius: 10px; font-size: 14px; cursor: pointer; border: 1px solid #e0e0e0; background: white; color: #757575; }
@@ -87,7 +99,7 @@
 <div class="topbar">
   <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
   <h1>Saisie terrain</h1>
-  <span class="drive-status disconnected" id="driveStatus" onclick="showDriveOverlay()">☁ Drive</span>
+  <span class="drive-status off" id="driveStatus" onclick="showOverlay()">☁ Drive</span>
   <span class="badge" id="badge" onclick="togglePage()">0 visite</span>
 </div>
 
@@ -95,8 +107,8 @@
 <div class="overlay" id="driveOverlay">
   <div class="overlay-box">
     <div style="font-size:40px;margin-bottom:12px">☁️</div>
-    <h2>Connexion Google Drive</h2>
-    <p>Les photos seront envoyées automatiquement dans le dossier <strong>Relevés_Terrain</strong> de votre Drive.</p>
+    <h2>Google Drive</h2>
+    <p>Les photos seront envoyées dans le dossier <strong>Relevés_Terrain</strong> de votre Drive.</p>
     <button class="btn-google" onclick="connectDrive()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       Se connecter avec Google
@@ -157,23 +169,19 @@
   </div>
 </div>
 
-<div class="toast" id="toast">
-  <span id="toastMsg"></span>
-</div>
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
 
-<!-- Google Identity Services -->
 <script src="https://accounts.google.com/gsi/client" async></script>
-
 <script>
   const CLIENT_ID = '923335649797-5obt228e0qe7snv735kih1i2hc3njm0u.apps.googleusercontent.com';
   const SCOPES    = 'https://www.googleapis.com/auth/drive.file';
   const FOLDER    = 'Relevés_Terrain';
 
-  let visits    = JSON.parse(localStorage.getItem('terrain_v1') || '[]');
-  let pics      = [];        // { name, data(base64), blob }
-  let onList    = false;
-  let token     = localStorage.getItem('drive_token') || null;
-  let folderId  = localStorage.getItem('drive_folder_id') || null;
+  let visits   = JSON.parse(localStorage.getItem('terrain_v2') || '[]');
+  let pics     = [];   // { name, data, blob, comment, uploaded }
+  let onList   = false;
+  let token    = localStorage.getItem('drive_token') || null;
+  let folderId = localStorage.getItem('drive_folder_id') || null;
 
   // ── Init ──────────────────────────────────────────────────────────────────
   (function init() {
@@ -181,122 +189,84 @@
     document.getElementById('dt').value = n.toISOString().slice(0,16);
     updateBadge();
     renderGrid();
-    updateDriveStatus();
-    // Afficher overlay si pas encore connecté
-    if (!token) setTimeout(showDriveOverlay, 600);
+    updateDriveUI();
+    if (!token) setTimeout(showOverlay, 600);
   })();
 
-  // ── Drive Auth ────────────────────────────────────────────────────────────
-  function showDriveOverlay() {
-    document.getElementById('driveOverlay').classList.add('show');
-  }
-  function skipDrive() {
-    document.getElementById('driveOverlay').classList.remove('show');
-  }
+  // ── Drive Auth ─────────────────────────────────────────────────────────────
+  function showOverlay() { document.getElementById('driveOverlay').classList.add('show'); }
+  function skipDrive()   { document.getElementById('driveOverlay').classList.remove('show'); }
 
   function connectDrive() {
     const client = google.accounts.oauth2.initTokenClient({
-      client_id: CLIENT_ID,
-      scope: SCOPES,
-      callback: (resp) => {
-        if (resp.error) { showToast('Erreur connexion Drive', 'error'); return; }
+      client_id: CLIENT_ID, scope: SCOPES,
+      callback: resp => {
+        if (resp.error) { showToast('Erreur connexion Drive', 'err'); return; }
         token = resp.access_token;
         localStorage.setItem('drive_token', token);
-        document.getElementById('driveOverlay').classList.remove('show');
-        updateDriveStatus();
-        showToast('✓ Connecté à Google Drive', 'success');
+        skipDrive();
+        updateDriveUI();
+        showToast('✓ Connecté à Google Drive', 'ok');
         ensureFolder();
       }
     });
     client.requestAccessToken();
   }
 
-  function updateDriveStatus() {
+  function updateDriveUI() {
     const el = document.getElementById('driveStatus');
-    if (token) {
-      el.textContent = '✓ Drive';
-      el.className = 'drive-status connected';
-    } else {
-      el.textContent = '☁ Drive';
-      el.className = 'drive-status disconnected';
-    }
+    el.textContent = token ? '✓ Drive' : '☁ Drive';
+    el.className   = 'drive-status ' + (token ? 'on' : 'off');
   }
 
-  // ── Dossier Drive ─────────────────────────────────────────────────────────
+  // ── Dossier racine ─────────────────────────────────────────────────────────
   async function ensureFolder() {
     if (folderId) return folderId;
-    try {
-      // Cherche si le dossier existe déjà
-      const q = encodeURIComponent(`name='${FOLDER}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
-      const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
-        headers: { Authorization: 'Bearer ' + token }
+    const q   = encodeURIComponent(`name='${FOLDER}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id)`, { headers: { Authorization: 'Bearer ' + token } });
+    const d   = await res.json();
+    if (d.files && d.files.length) { folderId = d.files[0].id; }
+    else {
+      const cr = await fetch('https://www.googleapis.com/drive/v3/files', {
+        method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: FOLDER, mimeType: 'application/vnd.google-apps.folder' })
       });
-      const data = await res.json();
-      if (data.files && data.files.length > 0) {
-        folderId = data.files[0].id;
-      } else {
-        // Crée le dossier
-        const cr = await fetch('https://www.googleapis.com/drive/v3/files', {
-          method: 'POST',
-          headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: FOLDER, mimeType: 'application/vnd.google-apps.folder' })
-        });
-        const folder = await cr.json();
-        folderId = folder.id;
-      }
-      localStorage.setItem('drive_folder_id', folderId);
-      return folderId;
-    } catch(e) { console.error(e); return null; }
+      folderId = (await cr.json()).id;
+    }
+    localStorage.setItem('drive_folder_id', folderId);
+    return folderId;
   }
 
-  // ── Sous-dossier par visite ───────────────────────────────────────────────
   async function createSubFolder(name, parentId) {
-    const res = await fetch('https://www.googleapis.com/drive/v3/files', {
-      method: 'POST',
-      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+    const r = await fetch('https://www.googleapis.com/drive/v3/files', {
+      method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, mimeType: 'application/vnd.google-apps.folder', parents: [parentId] })
     });
-    const data = await res.json();
-    return data.id;
+    return (await r.json()).id;
   }
 
-  // ── Upload une photo ──────────────────────────────────────────────────────
-  async function uploadPhoto(blob, filename, parentId) {
+  async function uploadFile(blob, filename, mimeType, parentId) {
     const meta = JSON.stringify({ name: filename, parents: [parentId] });
     const form = new FormData();
     form.append('metadata', new Blob([meta], { type: 'application/json' }));
     form.append('file', blob);
-    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-      method: 'POST',
-      headers: { Authorization: 'Bearer ' + token },
-      body: form
+    const r = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      method: 'POST', headers: { Authorization: 'Bearer ' + token }, body: form
     });
-    return res.ok;
+    return r.ok;
   }
 
-  // ── Upload JSON données ───────────────────────────────────────────────────
-  async function uploadJSON(obj, filename, parentId) {
-    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
-    const meta = JSON.stringify({ name: filename, parents: [parentId] });
-    const form = new FormData();
-    form.append('metadata', new Blob([meta], { type: 'application/json' }));
-    form.append('file', blob);
-    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-      method: 'POST',
-      headers: { Authorization: 'Bearer ' + token },
-      body: form
-    });
-    return res.ok;
-  }
-
-  // ── Photo : caméra directe ────────────────────────────────────────────────
+  // ── Photo : caméra directe, numérotation courte ────────────────────────────
   function addPhoto(input) {
-    const f = input.files[0];
-    if (!f) return;
+    const f = input.files[0]; if (!f) return;
+    const num  = pics.length + 1;                          // numéro séquentiel 1,2,3…
+    const ext  = f.name.split('.').pop() || 'jpg';
+    const name = 'photo_' + String(num).padStart(3, '0') + '.' + ext;  // photo_001.jpg … photo_999.jpg
     const r = new FileReader();
     r.onload = e => {
-      pics.push({ name: f.name, data: e.target.result, blob: f, uploaded: false });
+      pics.push({ name, data: e.target.result, blob: f, comment: '', uploaded: false });
       renderGrid();
+      // NE PAS vider les autres champs
     };
     r.readAsDataURL(f);
     input.value = '';
@@ -307,16 +277,21 @@
     const lbl = document.getElementById('photosLabel');
     lbl.textContent = pics.length ? pics.length + ' photo(s)' : 'Photos';
     g.innerHTML = '';
+
     pics.forEach((p, i) => {
-      const d = document.createElement('div');
-      d.className = 'photo-thumb';
-      d.id = 'thumb-' + i;
-      d.innerHTML = '<img src="' + p.data + '" alt="photo">'
-                  + '<div class="del" onclick="delPic(' + i + ')">✕</div>'
-                  + (p.uploaded ? '<div class="done">✓</div>' : '');
-      g.appendChild(d);
+      const wrap = document.createElement('div');
+      wrap.className = 'photo-thumb';
+      wrap.innerHTML =
+        '<img src="' + p.data + '" alt="photo">' +
+        '<div class="del" onclick="delPic(' + i + ')">✕</div>' +
+        (p.uploaded ? '<div class="synced-badge">✓</div>' : '') +
+        '<div class="photo-info">' +
+          '<div class="photo-num">📷 ' + p.name + '</div>' +
+          '<input class="photo-comment-input" type="text" placeholder="Commentaire…" value="' + (p.comment||'').replace(/"/g,'&quot;') + '" oninput="updateComment(' + i + ',this.value)">' +
+        '</div>';
+      g.appendChild(wrap);
     });
-    // Bouton caméra
+
     const add = document.createElement('div');
     add.className = 'add-photo';
     add.innerHTML = '<div class="ico">📷</div><span>Photo</span>';
@@ -324,86 +299,78 @@
     g.appendChild(add);
   }
 
+  function updateComment(i, val) {
+    pics[i].comment = val;
+  }
+
   function delPic(i) { pics.splice(i, 1); renderGrid(); }
 
-  // ── Enregistrer ───────────────────────────────────────────────────────────
+  // ── Enregistrer ────────────────────────────────────────────────────────────
   async function save() {
-    const client  = document.getElementById('client').value.trim();
+    const client   = document.getElementById('client').value.trim();
     const chantier = document.getElementById('chantier').value.trim();
-    if (!client)   { showToast('Saisissez le client', 'error'); return; }
-    if (!chantier) { showToast('Saisissez le chantier', 'error'); return; }
+    if (!client)   { showToast('Saisissez le client', 'err'); return; }
+    if (!chantier) { showToast('Saisissez le chantier', 'err'); return; }
 
     const btn = document.getElementById('btnSave');
-    btn.disabled = true;
-    btn.textContent = 'Enregistrement…';
+    btn.disabled = true; btn.textContent = 'Enregistrement…';
 
     const visitDate = document.getElementById('dt').value || new Date().toISOString();
     const visit = {
-      id: Date.now(),
-      client, chantier,
+      id: Date.now(), client, chantier,
       loc: document.getElementById('loc').value.trim(),
-      date: visitDate,
-      photos: pics.map(p => ({ name: p.name })),
-      synced: false
+      date: visitDate, synced: false,
+      photos: pics.map(p => ({ name: p.name, comment: p.comment }))
     };
 
-    // ── Envoi sur Drive si connecté ──
+    // ── Envoi Drive ──
     if (token) {
       try {
         btn.textContent = 'Envoi Drive…';
-        const rootId = await ensureFolder();
-        if (rootId) {
-          // Nom du sous-dossier : date_client_chantier
-          const dateStr = new Date(visitDate).toISOString().slice(0,10);
-          const subName = dateStr + '_' + client.replace(/\s+/g,'_') + '_' + chantier.replace(/\s+/g,'_');
-          const subId   = await createSubFolder(subName, rootId);
+        const rootId  = await ensureFolder();
+        const dateStr = new Date(visitDate).toISOString().slice(0,10);
+        const subName = dateStr + '_' + client.replace(/\s+/g,'_') + '_' + chantier.replace(/\s+/g,'_');
+        const subId   = await createSubFolder(subName, rootId);
 
-          // Upload chaque photo
-          for (let i = 0; i < pics.length; i++) {
-            const p = pics[i];
-            const thumb = document.getElementById('thumb-' + i);
-            if (thumb) thumb.innerHTML += '<div class="uploading">↑</div>';
-            const ok = await uploadPhoto(p.blob, p.name, subId);
-            if (ok) {
-              p.uploaded = true;
-              renderGrid();
-            }
+        for (let i = 0; i < pics.length; i++) {
+          const p = pics[i];
+          // Affiche indicateur upload
+          const thumbs = document.querySelectorAll('.photo-thumb');
+          if (thumbs[i]) {
+            const badge = document.createElement('div');
+            badge.className = 'uploading-badge'; badge.textContent = '↑';
+            thumbs[i].appendChild(badge);
           }
+          await uploadFile(p.blob, p.name, p.blob.type || 'image/jpeg', subId);
+          pics[i].uploaded = true;
+          renderGrid();
+        }
 
-          // Upload JSON données
-          await uploadJSON(visit, 'donnees.json', subId);
-          visit.synced   = true;
-          visit.driveFolder = subName;
-          showToast('✓ Envoyé sur Drive : ' + FOLDER + '/' + subName, 'success');
-        }
-      } catch(err) {
-        console.error(err);
-        // Token expiré ?
-        if (err.message && err.message.includes('401')) {
-          token = null; localStorage.removeItem('drive_token');
-          updateDriveStatus();
-        }
-        showToast('Enregistré localement (Drive indisponible)', '');
+        // JSON avec commentaires
+        await uploadFile(
+          new Blob([JSON.stringify(visit, null, 2)], { type: 'application/json' }),
+          'donnees.json', 'application/json', subId
+        );
+
+        visit.synced = true;
+        visit.driveFolder = subName;
+        showToast('✓ Drive : ' + subName, 'ok');
+      } catch(e) {
+        console.error(e);
+        if (String(e).includes('401')) { token = null; localStorage.removeItem('drive_token'); updateDriveUI(); }
+        showToast('Enregistré localement', '');
       }
     } else {
-      showToast(client + ' — ' + chantier + ' enregistré', 'success');
+      showToast('✓ ' + client + ' — ' + chantier, 'ok');
     }
 
     visits.push(visit);
-    try { localStorage.setItem('terrain_v1', JSON.stringify(visits)); } catch(e) {}
+    try { localStorage.setItem('terrain_v2', JSON.stringify(visits)); } catch(e) {}
     updateBadge();
-    btn.disabled = false;
-    btn.textContent = 'Enregistrer';
-    reset();
-  }
+    btn.disabled = false; btn.textContent = 'Enregistrer';
 
-  function reset() {
+    // Reset photos seulement, PAS les champs texte
     pics = [];
-    document.getElementById('client').value   = '';
-    document.getElementById('chantier').value = '';
-    document.getElementById('loc').value      = '';
-    const n = new Date(); n.setSeconds(0); n.setMilliseconds(0);
-    document.getElementById('dt').value = n.toISOString().slice(0,16);
     renderGrid();
   }
 
@@ -427,27 +394,23 @@
     }
     el.innerHTML = visits.slice().reverse().map(v => {
       const d = v.date ? new Date(v.date).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}) : '';
-      const dot = v.synced ? 'vdot synced' : 'vdot';
-      const icon = v.synced ? '☁✓' : '📷';
-      return '<div class="vitem"><div class="' + dot + '"></div><div class="vinfo"><div class="vname">' + v.client + ' — ' + v.chantier + '</div><div class="vmeta">' + d + (v.loc ? ' · ' + v.loc : '') + (v.synced ? ' · Drive ✓' : '') + '</div></div><div class="vphotos">' + (v.photos||[]).length + ' ' + icon + '</div></div>';
+      return '<div class="vitem"><div class="vdot ' + (v.synced?'ok':'') + '"></div><div class="vinfo"><div class="vname">' + v.client + ' — ' + v.chantier + '</div><div class="vmeta">' + d + (v.loc?' · '+v.loc:'') + (v.synced?' · ☁✓':'') + '</div></div><div class="vphotos">' + (v.photos||[]).length + ' 📷</div></div>';
     }).join('');
   }
 
   function exportJSON() {
-    if (!visits.length) { showToast('Aucune visite', 'error'); return; }
+    if (!visits.length) { showToast('Aucune visite', 'err'); return; }
     const b = new Blob([JSON.stringify(visits, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(b);
-    a.download = 'tournee_' + new Date().toISOString().slice(0,10) + '.json';
-    a.click();
+    a.href = URL.createObjectURL(b); a.download = 'tournee_' + new Date().toISOString().slice(0,10) + '.json'; a.click();
   }
 
   function showToast(msg, type) {
     const t = document.getElementById('toast');
     document.getElementById('toastMsg').textContent = msg;
     t.className = 'toast show' + (type ? ' ' + type : '');
-    clearTimeout(t._timer);
-    t._timer = setTimeout(() => t.classList.remove('show'), 3500);
+    clearTimeout(t._t);
+    t._t = setTimeout(() => t.classList.remove('show'), 3500);
   }
 </script>
 </body>
