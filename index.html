@@ -11,6 +11,7 @@
 <title>Saisie terrain</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%231a73e8'/%3E%3Cpath d='M256 80c-70.7 0-128 57.3-128 128 0 96 128 244 128 244s128-148 128-244c0-70.7-57.3-128-128-128zm0 172c-24.3 0-44-19.7-44-44s19.7-44 44-44 44 19.7 44 44-19.7 44-44 44z' fill='white'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%231a73e8'/%3E%3Cpath d='M256 80c-70.7 0-128 57.3-128 128 0 96 128 244 128 244s128-148 128-244c0-70.7-57.3-128-128-128zm0 172c-24.3 0-44-19.7-44-44s19.7-44 44-44 44 19.7 44 44-19.7 44-44 44z' fill='white'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.json">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #f0f4f8; min-height: 100vh; }
@@ -28,29 +29,30 @@
   .field input::placeholder { color: #bdbdbd; }
   .field input[type="datetime-local"] { font-size: 15px; }
 
-  /* Photos */
   .photos-section { padding: 12px 16px 14px; }
   .photos-label { font-size: 11px; color: #757575; font-weight: 500; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 10px; }
+  .photo-btns { display: flex; gap: 8px; margin-top: 4px; }
+  .photo-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; background: #f0f4f8; border: 2px dashed #1a73e8; border-radius: 10px; padding: 13px; cursor: pointer; }
+  .photo-btn span { font-size: 14px; color: #1a73e8; font-weight: 500; }
+
   .photo-item { display: flex; gap: 10px; align-items: center; background: #f9f9f9; border-radius: 10px; padding: 10px; margin-bottom: 8px; border: 1px solid #f0f0f0; }
-  .photo-item img { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+  .photo-item img { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; flex-shrink: 0; cursor: pointer; }
   .photo-item-info { flex: 1; min-width: 0; }
   .photo-ref { font-size: 12px; color: #1a73e8; font-weight: 600; }
-  .photo-orig { font-size: 10px; color: #9e9e9e; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .del-btn { background: rgba(0,0,0,.4); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .add-photo { display: flex; align-items: center; justify-content: center; gap: 8px; background: #f0f4f8; border: 2px dashed #1a73e8; border-radius: 10px; padding: 16px; cursor: pointer; margin-top: 4px; }
-  .add-photo span { font-size: 15px; color: #1a73e8; font-weight: 500; }
+  .photo-saved { font-size: 10px; color: #4caf50; margin-top: 2px; }
+  .photo-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+  .del-btn { background: rgba(0,0,0,.4); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .save-gal-btn { background: #4caf50; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
   .save-wrap { padding: 0 14px 30px; }
   .btn-save { width: 100%; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; border: none; background: #1a73e8; color: white; transition: all .15s; }
-  .btn-save:active { background: #185ab4; transform: scale(0.99); }
+  .btn-save:active { background: #185ab4; }
 
-  /* Tournée */
   .list-wrap { padding: 14px; }
   .summary { background: white; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; gap: 12px; }
   .summary-item { flex: 1; text-align: center; }
   .summary-item .num { font-size: 26px; font-weight: 600; color: #1a73e8; }
   .summary-item .lbl { font-size: 11px; color: #9e9e9e; margin-top: 2px; }
-  .info-box { background: #e8f0fe; border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; font-size: 12px; color: #1a3e6e; line-height: 1.6; }
   .btn-zip { width: 100%; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; border: none; background: #2e7d32; color: white; margin-bottom: 10px; }
   .btn-zip:active { background: #1b5e20; }
   .btn-zip:disabled { background: #9e9e9e; }
@@ -66,9 +68,11 @@
 
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); color: white; padding: 12px 20px; border-radius: 8px; font-size: 14px; display: none; align-items: center; gap: 8px; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,.25); max-width: 88vw; text-align: center; background: #323232; }
   .toast.show { display: flex; }
-  .toast.ok   { background: #2e7d32; }
-  .toast.err  { background: #c62828; }
-  #fileInput { display: none; }
+  .toast.ok  { background: #2e7d32; }
+  .toast.err { background: #c62828; }
+
+  #fileCamera { display: none; }
+  #fileGallery { display: none; }
 </style>
 </head>
 <body>
@@ -79,7 +83,6 @@
   <span class="badge" id="badge" onclick="togglePage()">0 visite</span>
 </div>
 
-<!-- PAGE FORMULAIRE -->
 <div class="page active" id="pageForm">
   <div class="form-wrap">
     <div class="card">
@@ -104,15 +107,25 @@
         <input type="datetime-local" id="dt">
       </div>
     </div>
+
     <div class="card">
       <div class="photos-section">
         <div class="photos-label" id="photosLabel">Photos</div>
         <div id="photoList"></div>
-        <div class="add-photo" onclick="document.getElementById('fileInput').click()">
-          <span style="font-size:24px">📷</span>
-          <span>Prendre une photo</span>
+        <div class="photo-btns">
+          <div class="photo-btn" onclick="document.getElementById('fileCamera').click()">
+            <span style="font-size:22px">📷</span>
+            <span>Caméra</span>
+          </div>
+          <div class="photo-btn" onclick="document.getElementById('fileGallery').click()">
+            <span style="font-size:22px">🖼</span>
+            <span>Galerie</span>
+          </div>
         </div>
-        <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="addPhoto(this)">
+        <!-- Caméra : ouvre directement l'appareil photo -->
+        <input type="file" id="fileCamera" accept="image/*" capture="environment" onchange="addPhoto(this, true)">
+        <!-- Galerie : permet de choisir depuis les photos existantes -->
+        <input type="file" id="fileGallery" accept="image/*" multiple onchange="addPhoto(this, false)">
       </div>
     </div>
   </div>
@@ -121,17 +134,11 @@
   </div>
 </div>
 
-<!-- PAGE TOURNÉE -->
 <div class="page" id="pageList">
   <div class="list-wrap">
     <div class="summary">
       <div class="summary-item"><div class="num" id="sumVisites">0</div><div class="lbl">Visites</div></div>
       <div class="summary-item"><div class="num" id="sumPhotos">0</div><div class="lbl">Photos</div></div>
-    </div>
-    <div class="info-box">
-      📷 Les photos sont sauvegardées dans votre <strong>galerie Android</strong>.<br>
-      📦 Le ZIP contient le JSON avec les références photo.<br>
-      🗂 Sur PC : ajoutez les photos depuis la galerie au dossier Drive.
     </div>
     <button class="btn-zip" id="btnZip" onclick="exportZip()">📦 Exporter la tournée (ZIP)</button>
     <button class="btn-raz" onclick="razTournee()">🗑 Nouvelle tournée</button>
@@ -143,9 +150,9 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
-  const KEY = 'terrain_v5';
+  const KEY  = 'terrain_v6';
   let visits = JSON.parse(localStorage.getItem(KEY) || '[]');
-  let pics   = []; // { ref, origName, preview } — preview juste pour affichage, pas stocké
+  let pics   = []; // { ref, blob, data } — data = base64 pour aperçu + ZIP
   let onList = false;
 
   (function init() {
@@ -155,21 +162,34 @@
     renderPhotos();
   })();
 
-  // ── Photo : ouvre caméra, photo sauvegardée dans la galerie par Android ───
-  function addPhoto(input) {
-    const f = input.files[0]; if (!f) return;
-    const num = pics.length + 1;
-    const ext = f.name.split('.').pop() || 'jpg';
-    // Référence courte = nom normalisé
-    const ref = 'photo_' + String(num).padStart(3,'0') + '.' + ext;
-    // Aperçu pour affichage uniquement (non stocké)
-    const r = new FileReader();
-    r.onload = e => {
-      pics.push({ ref, origName: f.name, preview: e.target.result });
-      renderPhotos();
-    };
-    r.readAsDataURL(f);
+  // ── Ajout photo (caméra ou galerie) ──────────────────────────────────────
+  function addPhoto(input, fromCamera) {
+    const files = Array.from(input.files);
+    files.forEach(f => {
+      const num = pics.length + 1;
+      const ext = f.name.split('.').pop() || 'jpg';
+      const ref = 'photo_' + String(num).padStart(3,'0') + '.' + ext;
+      const r   = new FileReader();
+      r.onload  = e => {
+        pics.push({ ref, blob: f, data: e.target.result, fromCamera });
+        renderPhotos();
+        // Si photo prise depuis la caméra → la sauvegarder dans la galerie
+        if (fromCamera) saveToGallery(e.target.result, ref);
+      };
+      r.readAsDataURL(f);
+    });
     input.value = '';
+  }
+
+  // ── Sauvegarder dans la galerie Android via téléchargement ───────────────
+  function saveToGallery(dataUrl, filename) {
+    const a = document.createElement('a');
+    a.href     = dataUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('📥 ' + filename + ' → galerie', 'ok');
   }
 
   function renderPhotos() {
@@ -179,19 +199,23 @@
     pics.forEach((p, i) => {
       const d = document.createElement('div');
       d.className = 'photo-item';
-      d.innerHTML = '<img src="' + p.preview + '" alt="photo">'
-        + '<div class="photo-item-info">'
-        + '<div class="photo-ref">📷 ' + p.ref + '</div>'
-        + '<div class="photo-orig">Galerie : ' + p.origName + '</div>'
-        + '</div>'
-        + '<button class="del-btn" onclick="delPic(' + i + ')">✕</button>';
+      d.innerHTML =
+        '<img src="' + p.data + '" alt="photo" onclick="saveToGallery(\'' + p.data.substring(0,30) + '...\',\'' + p.ref + '\')">' +
+        '<div class="photo-item-info">' +
+          '<div class="photo-ref">📷 ' + p.ref + '</div>' +
+          '<div class="photo-saved">' + (p.fromCamera ? '✓ Sauvegardée dans la galerie' : '✓ Depuis la galerie') + '</div>' +
+        '</div>' +
+        '<div class="photo-actions">' +
+          '<button class="save-gal-btn" onclick="saveToGallery(pics['+i+'].data, pics['+i+'].ref)" title="Sauvegarder dans galerie">⬇</button>' +
+          '<button class="del-btn" onclick="delPic('+i+')">✕</button>' +
+        '</div>';
       list.appendChild(d);
     });
   }
 
   function delPic(i) { pics.splice(i,1); renderPhotos(); }
 
-  // ── Enregistrer : stocke uniquement les refs (texte léger) ───────────────
+  // ── Enregistrer ───────────────────────────────────────────────────────────
   function save() {
     const client   = document.getElementById('client').value.trim();
     const chantier = document.getElementById('chantier').value.trim();
@@ -204,16 +228,12 @@
       loc:         document.getElementById('loc').value.trim(),
       commentaire: document.getElementById('commentaire').value.trim(),
       date:        document.getElementById('dt').value || new Date().toISOString(),
-      photos: pics.map(p => ({
-        ref:      p.ref,        // ex: photo_001.jpg  → dans le JSON
-        original: p.origName    // nom original dans la galerie Android
-      }))
+      photos:      pics.map(p => p.ref)
     });
 
     localStorage.setItem(KEY, JSON.stringify(visits));
     updateBadge();
     showToast('✓ ' + client + ' — ' + chantier + ' (' + pics.length + ' photo(s))', 'ok');
-    // Reset photos seulement
     pics = [];
     renderPhotos();
   }
@@ -250,7 +270,7 @@
     }).join('');
   }
 
-  // ── Export ZIP : JSON uniquement + instructions ───────────────────────────
+  // ── Export ZIP : JSON + photos depuis les blobs en mémoire ────────────────
   async function exportZip() {
     if (!visits.length) { showToast('Aucune visite','err'); return; }
     const btn = document.getElementById('btnZip');
@@ -259,22 +279,18 @@
       const zip     = new JSZip();
       const dateStr = new Date().toISOString().slice(0,10);
       const root    = zip.folder('tournee_' + dateStr);
-
-      // JSON global
       root.file('tournee.json', JSON.stringify(visits, null, 2));
 
-      // Un sous-dossier par visite avec son JSON
       for (const v of visits) {
         const nom = (v.client + '_' + v.chantier).replace(/[^a-zA-Z0-9_\-]/g,'_').substring(0,40);
         const vf  = root.folder(nom);
         vf.file('donnees.json', JSON.stringify(v, null, 2));
-        // Fichier texte avec les références photos pour retrouver dans la galerie
-        if (v.photos && v.photos.length) {
-          const lines = v.photos.map((p,i) =>
-            'Référence : ' + p.ref + '\nFichier galerie : ' + p.original
-          ).join('\n---\n');
-          vf.file('photos_references.txt', lines);
-        }
+        // Les photos sont dans pics (mémoire session)
+        // Note : seules les photos de la session en cours sont disponibles
+        (v.photos||[]).forEach(ref => {
+          const p = pics.find(x => x.ref === ref);
+          if (p && p.blob) vf.file(p.ref, p.blob);
+        });
       }
 
       const blob = await zip.generateAsync({ type:'blob', compression:'DEFLATE', compressionOptions:{level:5} });
@@ -308,6 +324,13 @@
     clearTimeout(t._t);
     t._t = setTimeout(() => t.classList.remove('show'), 3500);
   }
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/releve_terrain/sw.js")
+    .then(() => console.log("SW ok"))
+    .catch(e => console.log("SW err", e));
+}
 </script>
 </body>
 </html>
