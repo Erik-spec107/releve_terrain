@@ -131,7 +131,7 @@
   <div id="modal" onclick="event.stopPropagation()">
     <h2>Exporter la tournée</h2>
     <p id="modal-sub">—</p>
-    <button class="mbtn" style="background:var(--green);color:#fff" onclick="doZip()">📦 Télécharger le ZIP (JSON)</button>
+    <button class="mbtn" style="background:var(--green);color:#fff" onclick="doJSON()">📄 Télécharger le JSON</button>
     <button class="mbtn" style="background:var(--blue);color:#fff" onclick="doDrive()">☁ Ouvrir Google Drive</button>
     <button class="mbtn" style="background:var(--bg);border:1px solid var(--border)" onclick="closeExport()">Annuler</button>
   </div>
@@ -139,7 +139,6 @@
 
 <div id="toast"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 // ── ÉTAT ──
 var photoB64 = '', photoNom = '';
@@ -304,27 +303,27 @@ function openExport() {
 }
 function closeExport() { document.getElementById('overlay').classList.remove('open'); }
 
-function doZip() {
+function doJSON() {
   var db      = getDB();
   var dateStr = new Date().toLocaleDateString('fr-FR').replace(/\//g,'-');
-  var zip     = new JSZip();
-  var root    = zip.folder('tournee_' + dateStr);
-  root.file('tournee.json', JSON.stringify(db, null, 2));
-  // Un sous-dossier par visite
-  for (var i = 0; i < db.length; i++) {
-    var v   = db[i];
-    var nom = (v.client + '_' + v.chantier).replace(/[^a-zA-Z0-9_\-]/g,'_').substring(0,40);
-    var vf  = root.folder(nom);
-    vf.file('donnees.json', JSON.stringify(v, null, 2));
-    if (v.photo) vf.file('photo.txt', 'Fichier photo dans Téléchargements : ' + v.photo);
-  }
-  zip.generateAsync({ type:'blob', compression:'DEFLATE' }).then(function(blob) {
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'tournee_' + dateStr + '.zip';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    closeExport(); toast('ZIP téléchargé ✓');
+  // Export uniquement les champs utiles
+  var export_data = db.map(function(v) {
+    return {
+      client:       v.client,
+      chantier:     v.chantier,
+      localisation: v.localisation,
+      commentaire:  v.commentaire,
+      date:         v.date,
+      heure:        v.heure,
+      photo:        v.photo || ''
+    };
   });
+  var blob = new Blob([JSON.stringify(export_data, null, 2)], { type: 'application/json;charset=utf-8;' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'tournee_' + dateStr + '.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  closeExport(); toast('JSON téléchargé ✓');
 }
 
 function doDrive() {
