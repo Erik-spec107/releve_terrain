@@ -168,7 +168,8 @@ function showPage(id, btn) {
 function handlePhoto(e) {
   var file = e.target.files[0]; if (!file) return;
   var ts  = Date.now();
-  photoNom = 'terrain_' + ts + '.jpg';
+  var ext = file.name.split('.').pop() || 'jpg';
+  photoNom = 'terrain_' + ts + '.' + ext;
 
   var img = new Image();
   var url = URL.createObjectURL(file);
@@ -301,8 +302,8 @@ function delItem(id) {
 function openExport() {
   var db = getDB();
   if (!db.length) { toast('Aucune visite à exporter'); return; }
-  var photos = db.filter(function(d){ return d.photo; }).length;
-  document.getElementById('modal-sub').textContent = db.length + ' visite(s) · ' + photos + ' photo(s) dans vos Téléchargements';
+  var photos = db.reduce(function(s,d){ return s + (d.photos && d.photos.length ? d.photos.length : (d.photo ? 1 : 0)); }, 0);
+  document.getElementById('modal-sub').textContent = db.length + ' visite(s) · ' + photos + ' photo(s)';
   document.getElementById('overlay').classList.add('open');
 }
 function closeExport() { document.getElementById('overlay').classList.remove('open'); }
@@ -318,7 +319,7 @@ function doJSON() {
       localisation: v.localisation,
       commentaire:  v.commentaire,
       date:         v.date,
-      photo:        v.photo || ''
+      photos:       v.photos && v.photos.length ? v.photos : []
     };
   });
   var blob = new Blob([JSON.stringify(export_data, null, 2)], { type: 'application/json;charset=utf-8;' });
