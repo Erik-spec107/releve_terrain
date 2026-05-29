@@ -225,12 +225,11 @@ function saveVisite() {
   var rec = {
     id:          now.getTime(),
     date:        now.toLocaleDateString('fr-FR'),
-    heure:       now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
     client:      client,
     chantier:    chantier,
     localisation: document.getElementById('f-loc').value.trim(),
     commentaire: document.getElementById('f-comment').value.trim(),
-    photo:       photoNom
+    photos:      photoNom ? [photoNom] : []
   };
 
   var db = getDB(); db.push(rec); saveDB(db);
@@ -259,7 +258,7 @@ function renderListe() {
   var today = new Date().toLocaleDateString('fr-FR');
   var photos = 0, todays = 0;
   for (var i = 0; i < db.length; i++) {
-    if (db[i].photo) photos++;
+    if (db[i].photos && db[i].photos.length) photos += db[i].photos.length;
     if (db[i].date === today) todays++;
   }
   document.getElementById('s-total').textContent  = db.length;
@@ -270,16 +269,16 @@ function renderListe() {
   var html = '';
   for (var j = 0; j < db.length; j++) {
     var d = db[j];
-    var thumb = d.photo
-      ? '<div class="dnophoto" title="' + d.photo + '">📷</div>'
+    var thumb = (d.photos && d.photos.length)
+      ? '<div class="dnophoto" title="' + d.photos[0] + '">📷</div>'
       : '<div class="dnophoto">🏗</div>';
     html += '<div class="ditem">' + thumb
       + '<div class="dbody">'
       + '<div class="dtitle">' + d.client + ' — ' + d.chantier + '</div>'
       + '<div class="dmeta">'
-      + d.date + ' à ' + d.heure
+      + d.date
       + (d.localisation ? '<br>📍 ' + d.localisation : '')
-      + (d.photo        ? '<br>📷 ' + d.photo : '')
+      + (d.photos && d.photos.length ? '<br>📷 ' + d.photos.join(', ') : '')
       + (d.commentaire  ? '<br><em>' + d.commentaire + '</em>' : '')
       + '</div></div>'
       + '<button class="ddel" onclick="delItem(' + d.id + ')">✕</button>'
@@ -314,7 +313,6 @@ function doJSON() {
       localisation: v.localisation,
       commentaire:  v.commentaire,
       date:         v.date,
-      heure:        v.heure,
       photo:        v.photo || ''
     };
   });
