@@ -103,6 +103,11 @@
   </div>
 
   <div class="card">
+    <div class="card-title">Date</div>
+    <div id="f-date-display" style="font-size:15px;color:var(--text);padding:2px 0"></div>
+  </div>
+
+  <div class="card">
     <div class="card-title">Photo</div>
     <input type="file" id="file-inp" accept="image/*" capture="environment" onchange="handlePhoto(event)">
     <div id="photo-zone" onclick="document.getElementById('file-inp').click()">📷 Prendre une photo</div>
@@ -242,6 +247,7 @@ function resetForm() {
   document.getElementById('f-loc').value = '';
   document.getElementById('f-comment').value = '';
   clearPhoto();
+  afficherDate();
   window.scrollTo(0,0);
 }
 
@@ -325,6 +331,12 @@ function doJSON() {
 }
 
 
+function afficherDate() {
+  var now = new Date();
+  var el = document.getElementById('f-date-display');
+  if (el) el.textContent = now.toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit', year:'numeric'});
+}
+
 function toast(msg) {
   var el = document.getElementById('toast');
   el.textContent = msg; el.classList.add('show');
@@ -334,6 +346,7 @@ function toast(msg) {
 // Init
 (function(){
   updateHeader();
+  afficherDate();
 })();
 </script>
 </body>
